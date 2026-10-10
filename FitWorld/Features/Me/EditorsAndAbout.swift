@@ -2,12 +2,10 @@ import SwiftUI
 
 /// Edits core profile fields later via the Me tab.
 struct ProfileEditorView: View {
-    @Environment(ProfileStore.self) private var profile
+    @Environment(ProfileStore.self) private var profileStore
 
     var body: some View {
-
-        // Bindings over @Observable environment values:
-        @Bindable var profile = profile
+        @Bindable var profile = profileStore
         Form {
             Picker("Goal", selection: $profile.profile.primaryGoal) {
                 Text("None").tag(TrainingGoal?.none)
@@ -33,12 +31,10 @@ struct ProfileEditorView: View {
 }
 
 struct HeightWeightSection: View {
-    @Environment(ProfileStore.self) private var profile
+    @Environment(ProfileStore.self) private var profileStore
 
     var body: some View {
-
-        // Bindings over @Observable environment values:
-        @Bindable var profile = profile
+        @Bindable var profile = profileStore
         Section("Body (optional)") {
             HStack {
                 Text("Height (cm)")
@@ -61,12 +57,10 @@ struct HeightWeightSection: View {
 }
 
 struct PreferencesEditorView: View {
-    @Environment(ProfileStore.self) private var profile
+    @Environment(ProfileStore.self) private var profileStore
 
     var body: some View {
-
-        // Bindings over @Observable environment values:
-        @Bindable var profile = profile
+        @Bindable var profile = profileStore
         Form {
             Section("Training style") {
                 Toggle("Seated workouts", isOn: $profile.profile.prefersSeatedWorkouts)
@@ -95,9 +89,6 @@ struct PreferencesEditorView: View {
 /// Mandatory safety/about screen (§ "acceptance criteria" — safety text must ship).
 struct AboutSafetyView: View {
     var body: some View {
-
-        // Bindings over @Observable environment values:
-        @Bindable var profile = profile
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
                 Text("Safety first").font(.title2.bold())

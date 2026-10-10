@@ -97,39 +97,14 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             | xcbeautify --renderer github-actions
 
-      - name: Export IPA (ad-hoc, no signing)
+      - name: Package IPA
         run: |
-          set -o pipefail
-          xcodebuild -exportArchive \
-            -archivePath FitWorld.xcarchive \
-            -exportPath FitWorld-IPA \
-            -exportOptionsPlist exportOptions.plist \
-            | xcbeautify --renderer github-actions
-
-      - name: Create export options plist (ad-hoc, no signing)
-        run: |
-          cat > exportOptions.plist << 'PLIST'
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-              <key>method</key>
-              <string>ad-hoc</string>
-              <key>teamID</key>
-              <string></string>
-              <key>uploadBitcode</key>
-              <false/>
-              <key>uploadSymbols</key>
-              <true/>
-              <key>signingStyle</key>
-              <string>automatic</string>
-              <key>signingCertificate</key>
-              <string>Apple Development</string>
-              <key>provisioningProfiles</key>
-              <dict/>
-          </dict>
-          </plist>
-          PLIST
+          mkdir -p FitWorld-IPA/Payload
+          cp -R FitWorld.xcarchive/Products/Applications/FitWorld.app FitWorld-IPA/Payload/
+          cd FitWorld-IPA
+          zip -qr FitWorld.ipa Payload
+          rm -rf Payload
+          ls -la FitWorld.ipa
 
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4

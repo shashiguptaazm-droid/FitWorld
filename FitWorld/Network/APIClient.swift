@@ -32,7 +32,7 @@ struct APIClient {
     // MARK: Requests
 
     func get<T: Decodable>(_ path: String, query: [URLQueryItem] = []) async throws -> T {
-        try await request(path, method: "GET", query: query, body: nil)
+        try await request(path, method: "GET", query: query, body: (nil as String?))
     }
 
     func post<T: Decodable, B: Encodable>(_ path: String, body: B) async throws -> T {

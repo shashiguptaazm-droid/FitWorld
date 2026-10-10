@@ -13,9 +13,9 @@ final class SessionStore {
         // SwiftData's ModelContainer(for:) 'no exact matches' with a
         // schema-d ModelConfiguration on strict concurrency. Use the plain
         // configuration + [[Model]] static creator instead — unambiguous.
-        let config: ModelConfiguration = ModelConfiguration(isStoredInMemoryOnly: false)
-        let container: ModelContainer = try ModelContainer(
-            for: WorkoutSessionRecord.self, configurations: [config])
+        let config = ModelConfiguration(isStoredInMemoryOnly: false)
+        let container = try ModelContainer(
+            for: WorkoutSessionRecord.self, configurations: config)
         return container
     }
 

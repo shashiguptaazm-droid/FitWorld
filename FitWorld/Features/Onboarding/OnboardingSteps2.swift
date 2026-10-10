@@ -3,12 +3,10 @@ import SwiftUI
 // MARK: - Step 5: Body metrics (fully optional)
 
 struct BodyStepView: View {
-    @Environment(ProfileStore.self) private var profile
+    @Environment(ProfileStore.self) private var profileStore
 
     var body: some View {
-
-        // Bindings over @Observable environment values:
-        @Bindable var profile = profile
+        @Bindable var profile = profileStore
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 Text("Body metrics (optional)")
@@ -57,12 +55,10 @@ struct BodyStepView: View {
 // MARK: - Step 6: Preferences
 
 struct PreferencesStepView: View {
-    @Environment(ProfileStore.self) private var profile
+    @Environment(ProfileStore.self) private var profileStore
 
     var body: some View {
-
-        // Bindings over @Observable environment values:
-        @Bindable var profile = profile
+        @Bindable var profile = profileStore
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 Text("Preferences")
@@ -88,12 +84,10 @@ struct PreferencesStepView: View {
 // MARK: - Step 7: Accessibility
 
 struct AccessibilityStepView: View {
-    @Environment(ProfileStore.self) private var profile
+    @Environment(ProfileStore.self) private var profileStore
 
     var body: some View {
-
-        // Bindings over @Observable environment values:
-        @Bindable var profile = profile
+        @Bindable var profile = profileStore
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 Text("Accessibility")
@@ -119,9 +113,6 @@ struct SummaryStepView: View {
     let onFinish: () -> Void
 
     var body: some View {
-
-        // Bindings over @Observable environment values:
-        @Bindable var profile = profile
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 Text("You're set!")

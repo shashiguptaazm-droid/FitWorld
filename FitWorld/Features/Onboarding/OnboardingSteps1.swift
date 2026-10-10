@@ -3,12 +3,10 @@ import SwiftUI
 // MARK: - Step 1: Primary goal
 
 struct GoalStepView: View {
-    @Environment(ProfileStore.self) private var profile
+    @Environment(ProfileStore.self) private var profileStore
 
     var body: some View {
-
-        // Bindings over @Observable environment values:
-        @Bindable var profile = profile
+        @Bindable var profile = profileStore
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 Text("What's your main focus?")
@@ -32,12 +30,10 @@ struct GoalStepView: View {
 // MARK: - Step 2: Fitness level
 
 struct LevelStepView: View {
-    @Environment(ProfileStore.self) private var profile
+    @Environment(ProfileStore.self) private var profileStore
 
     var body: some View {
-
-        // Bindings over @Observable environment values:
-        @Bindable var profile = profile
+        @Bindable var profile = profileStore
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 Text("Your current level")
@@ -60,12 +56,10 @@ struct LevelStepView: View {
 // MARK: - Step 3: Location + equipment
 
 struct LocationStepView: View {
-    @Environment(ProfileStore.self) private var profile
+    @Environment(ProfileStore.self) private var profileStore
 
     var body: some View {
-
-        // Bindings over @Observable environment values:
-        @Bindable var profile = profile
+        @Bindable var profile = profileStore
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 Text("Where will you train?")
@@ -99,9 +93,6 @@ struct AvailabilityStepView: View {
     @State private var availabilityStore = AvailabilityDraft()
 
     var body: some View {
-
-        // Bindings over @Observable environment values:
-        @Bindable var profile = profile
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 Text("Weekly availability")

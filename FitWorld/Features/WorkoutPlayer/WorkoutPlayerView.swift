@@ -146,7 +146,6 @@ struct WorkoutPlayerView: View {
     private func sessionStoreRef() -> SessionStore? {
         if sessionStoreLazy == nil, let container = try? SessionStore.makeContainer() {
             let store = SessionStore(container: container)
-            store.prime()
             sessionStoreLazy = store
         }
         return sessionStoreLazy

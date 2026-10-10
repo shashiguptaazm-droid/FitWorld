@@ -11,23 +11,27 @@ struct EquipmentPicker: View {
 
     var body: some View {
         FlowLayoutCompat(items: ordered) { equipment in
-            let isOn = selection.contains(equipment)
-            Button {
-                if isOn {
-                    selection.removeAll { $0 == equipment }
-                } else {
-                    selection.append(equipment)
-                }
-            } label: {
-                Text(equipment.displayName)
-                    .font(.subheadline)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .background(isOn ? Color.accentColor.opacity(0.2) : Color(.tertiarySystemFill))
-                    .clipShape(Capsule())
-            }
-            .buttonStyle(.plain)
+            equipmentButton(for: equipment)
         }
+    }
+
+    private func equipmentButton(for equipment: Equipment) -> some View {
+        let isOn = selection.contains(equipment)
+        return Button {
+            if isOn {
+                selection.removeAll { $0 == equipment }
+            } else {
+                selection.append(equipment)
+            }
+        } label: {
+            Text(equipment.displayName)
+                .font(.subheadline)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(isOn ? Color.accentColor.opacity(0.2) : Color(.tertiarySystemFill))
+                .clipShape(Capsule())
+        }
+        .buttonStyle(.plain)
     }
 }
 
@@ -35,7 +39,12 @@ struct EquipmentPicker: View {
 
 struct FlowLayoutCompat<Item: Hashable, Content: View>: View {
     let items: [Item]
-    let content: (Item) -> Content
+    @ViewBuilder let content: (Item) -> Content
+
+    init(items: [Item], @ViewBuilder content: @escaping (Item) -> Content) {
+        self.items = items
+        self.content = content
+    }
 
     var body: some View {
         // Phase 1 keeps it simple: vertical list of capsule rows is readable,

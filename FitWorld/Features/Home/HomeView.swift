@@ -92,7 +92,7 @@ struct HomeView: View {
                     store.daysActive.contains(CalendarDay(date: day))
                 } ?? false
                 VStack(spacing: 4) {
-                    Text(day, style: .weekday).font(.caption2)
+                    Text(day.formatted(.dateTime.weekday(.abbreviated))).font(.caption2)
                     Circle()
                         .fill(isActive ? Color.accentColor : Color(.tertiarySystemFill))
                         .frame(width: 10, height: 10)
