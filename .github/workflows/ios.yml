@@ -1,0 +1,147 @@
+name: iOS Build & Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: macos-15
+    timeout-minutes: 45
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install XcodeGen
+        run: |
+          brew install xcodegen
+
+      - name: Generate Xcode project
+        run: |
+          xcodegen generate
+
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          xcrun simctl list devices available | head -20
+
+      - name: Resolve SPM dependencies
+        run: |
+          xcodebuild -resolvePackageDependencies \
+            -project FitWorld.xcodeproj \
+            -scheme FitWorld \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest'
+
+      - name: Build & test (iPhone simulator)
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -project FitWorld.xcodeproj \
+            -scheme FitWorld \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            | xcbeautify --renderer github-actions
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: |
+            **/test-results/*.xcresult
+          retention-days: 7
+
+  build-ipa:
+    runs-on: macos-15
+    timeout-minutes: 60
+    needs: test
+    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install XcodeGen
+        run: |
+          brew install xcodegen
+
+      - name: Generate Xcode project
+        run: |
+          xcodegen generate
+
+      - name: Resolve SPM dependencies
+        run: |
+          xcodebuild -resolvePackageDependencies \
+            -project FitWorld.xcodeproj \
+            -scheme FitWorld \
+            -destination 'generic/platform=iOS'
+
+      - name: Build archive
+        run: |
+          set -o pipefail
+          xcodebuild archive \
+            -project FitWorld.xcodeproj \
+            -scheme FitWorld \
+            -archivePath FitWorld.xcarchive \
+            -destination 'generic/platform=iOS' \
+            -skipInstall SKIP_INSTALL=NO \
+            CODE_SIGN_IDENTITY="-" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            | xcbeautify --renderer github-actions
+
+      - name: Export IPA (ad-hoc, no signing)
+        run: |
+          set -o pipefail
+          xcodebuild -exportArchive \
+            -archivePath FitWorld.xcarchive \
+            -exportPath FitWorld-IPA \
+            -exportOptionsPlist exportOptions.plist \
+            | xcbeautify --renderer github-actions
+
+      - name: Create export options plist (ad-hoc, no signing)
+        run: |
+          cat > exportOptions.plist << 'PLIST'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>method</key>
+              <string>ad-hoc</string>
+              <key>teamID</key>
+              <string></string>
+              <key>uploadBitcode</key>
+              <false/>
+              <key>uploadSymbols</key>
+              <true/>
+              <key>signingStyle</key>
+              <string>automatic</string>
+              <key>signingCertificate</key>
+              <string>Apple Development</string>
+              <key>provisioningProfiles</key>
+              <dict/>
+          </dict>
+          </plist>
+          PLIST
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: FitWorld-IPA
+          path: FitWorld-IPA/*.ipa
+          retention-days: 30
+
+      - name: Upload dSYMs
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: FitWorld-dSYMs
+          path: FitWorld.xcarchive/dSYMs
+          retention-days: 30

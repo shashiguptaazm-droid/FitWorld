@@ -1,0 +1,44 @@
+# Xcode
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+DerivedData/
+build/
+*.xcodeproj
+*.xcworkspace
+
+# SwiftPM
+.build/
+.swiftpm/
+Package.resolved
+
+# macOS
+.DS_Store
+*.swp
+*~
+
+# Generated with XcodeGen (project.yml is the source of truth)
+
+# XcodeGen generated
+*.xcodeproj
+*.xcworkspace
+
+# Xcode build artifacts
+build/
+DerivedData/
+*.ipa
+*.xcarchive
+exportOptions.plist
+
+# Swift Package Manager
+.build/
+.swiftpm/
+Package.resolved
+
+# macOS
+.DS_Store
+*.swp
+*~
+
+# Logs
+*.log
