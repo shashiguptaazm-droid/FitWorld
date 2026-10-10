@@ -125,7 +125,7 @@ final class AvailabilityDraft {
 
     func loadFromProfile() {
         // ProfileStore is fetched through environment on save; keep in sync here.
-        minutes = AvailabilityDraft.sharedProfile?.weeklyAvailabilityMinutes
+        minutes = AvailabilityDraft.sharedProfile?.profile.weeklyAvailabilityMinutes
             ?? Array(repeating: 30, count: 7)
     }
 

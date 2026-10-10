@@ -10,6 +10,11 @@ enum TimerPhase: Equatable {
     case transition
     case coolDown
     case finished
+
+    var isRest: Bool {
+        if case .rest = self { return true }
+        return false
+    }
 }
 
 /// Snapshot consumed by the UI every tick.
@@ -184,7 +189,7 @@ final class IntervalTimerEngine {
 
     private func beginSet() {
         // Progress set/block bookkeeping on entry.
-        if snapshot.phase == .rest || snapshot.phase == .transition {
+        if snapshot.phase.isRest || snapshot.phase == .transition {
             if snapshot.currentSet >= config.sets {
                 snapshot.currentSet = 1
                 snapshot.blockIndex += 1
