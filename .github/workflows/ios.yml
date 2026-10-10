@@ -8,58 +8,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
-    runs-on: macos-15
-    timeout-minutes: 45
-    
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Install XcodeGen
-        run: |
-          brew install xcodegen
-
-      - name: Generate Xcode project
-        run: |
-          xcodegen generate
-
-      - name: Show toolchain
-        run: |
-          xcodebuild -version
-          xcrun simctl list devices available | head -20
-
-      - name: Resolve SPM dependencies
-        run: |
-          xcodebuild -resolvePackageDependencies \
-            -project FitWorld.xcodeproj \
-            -scheme FitWorld \
-            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest'
-
-      - name: Build & test (iPhone simulator)
-        run: |
-          set -o pipefail
-          xcodebuild test \
-            -project FitWorld.xcodeproj \
-            -scheme FitWorld \
-            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
-            | xcbeautify --renderer github-actions
-
-      - name: Upload test results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: test-results
-          path: |
-            **/test-results/*.xcresult
-          retention-days: 7
-
   build-ipa:
-    runs-on: macos-15
+    runs-on: macos-14
     timeout-minutes: 60
-    needs: test
     if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
     
     steps:
@@ -76,6 +27,17 @@ jobs:
         run: |
           xcodegen generate
 
+      - name: Select Xcode 16
+        run: |
+          if [ -d "/Applications/Xcode_16.0.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_16.0.app
+          elif [ -d "/Applications/Xcode_16.1.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_16.1.app
+          elif [ -d "/Applications/Xcode_16.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_16.app
+          fi
+          xcodebuild -version
+
       - name: Resolve SPM dependencies
         run: |
           xcodebuild -resolvePackageDependencies \
@@ -85,7 +47,6 @@ jobs:
 
       - name: Build archive
         run: |
-          set -o pipefail
           xcodebuild archive \
             -project FitWorld.xcodeproj \
             -scheme FitWorld \
@@ -94,8 +55,7 @@ jobs:
             -skipInstall SKIP_INSTALL=NO \
             CODE_SIGN_IDENTITY="-" \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO \
-            | xcbeautify --renderer github-actions
+            CODE_SIGNING_ALLOWED=NO
 
       - name: Package IPA
         run: |
@@ -104,7 +64,7 @@ jobs:
           cd FitWorld-IPA
           zip -qr FitWorld.ipa Payload
           rm -rf Payload
-          ls -la FitWorld.ipa
+          ls -lh FitWorld.ipa
 
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
@@ -113,10 +73,45 @@ jobs:
           path: FitWorld-IPA/*.ipa
           retention-days: 30
 
-      - name: Upload dSYMs
-        uses: actions/upload-artifact@v4
-        if: always()
+  test:
+    runs-on: macos-14
+    timeout-minutes: 45
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          name: FitWorld-dSYMs
-          path: FitWorld.xcarchive/dSYMs
-          retention-days: 30
+          fetch-depth: 0
+
+      - name: Install XcodeGen
+        run: |
+          brew install xcodegen
+
+      - name: Generate Xcode project
+        run: |
+          xcodegen generate
+
+      - name: Select Xcode 16
+        run: |
+          if [ -d "/Applications/Xcode_16.0.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_16.0.app
+          elif [ -d "/Applications/Xcode_16.1.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_16.1.app
+          elif [ -d "/Applications/Xcode_16.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_16.app
+          fi
+          xcodebuild -version
+
+      - name: Resolve SPM dependencies
+        run: |
+          xcodebuild -resolvePackageDependencies \
+            -project FitWorld.xcodeproj \
+            -scheme FitWorld \
+            -destination 'platform=iOS Simulator,name=iPhone 15'
+
+      - name: Build & test (iPhone simulator)
+        run: |
+          xcodebuild test \
+            -project FitWorld.xcodeproj \
+            -scheme FitWorld \
+            -destination 'platform=iOS Simulator,name=iPhone 15'
